@@ -1,0 +1,823 @@
+\documentclass[11pt,a4paper,final]{article} 
+\usepackage[english, russian]{babel}
+\usepackage[final]{pdfpages}
+\usepackage{textcomp,enumitem}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{upgreek}
+\usepackage{tipa}
+\usepackage{tikz}
+\usepackage{graphics}
+\usepackage{pgfplots}
+\usepackage{indentfirst}
+\usepackage{algorithm}  
+\usepackage{algpseudocode}
+\usepackage[unicode, pdftex, colorlinks, urlcolor=blue]{hyperref}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc} 
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingo ffset=0cm, 
+%showframe
+]{geometry}
+\usepackage{amsmath,amssymb,cmap,pgfplots,pgfplotstable}
+
+\usetikzlibrary{arrows,calc,intersections}
+\addto\captionsrussian{\def\refname{}}
+\pgfplotsset{compat=newest}
+\pgfplotsset{compat=1.9}
+\linespread{1.5}
+\pagestyle{plain}
+\begin{document}
+	%\thispagestyle{empty}
+	\begin{center}
+		{\large МИНОБРНАУКИ РОССИИ}
+		\par
+		\vspace{8pt}
+		{\large ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ}
+		\vspace{7pt} 
+		{\large ВЫСШЕГО ПРОФЕССИОНАЛЬНОГО ОБРАЗОВАНИЯ}
+		
+		\vspace{3pt} 
+		{\Large \bf <<САНКТ-ПЕТЕРБУРГСКИЙ ПОЛИТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ ПЕТРА ВЕЛИКОГО>>}
+		
+		\vspace{1pt}
+		{\Large Институт Компьютерных наук и кибербезопастности}
+		
+		\vspace{1pt} 
+		{\Large Направление 02.03.01 Математика и компьютерные науки}
+		
+		\vspace{1pt} 
+		{\Large Высшая школа технологий искусственного интеллекта}
+		
+		\vspace{40pt}
+		{\Huge \bf Лабораторная работа 1 «Реализация двумерного клеточного автомата» по дисциплине «Теория алгоритмов»}
+		
+		\vspace{10pt}
+		{\Huge \bf Вариант 39}
+	\end{center}
+	
+	\vspace{160pt} 
+	\hspace{1cm}
+	{\large Обучающийся: \ \ \ \underline{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+		\hspace {2cm}   \ Санько В. В.} 
+	
+	\vspace{10pt} 
+	\hspace{1cm}
+	{\large Руководитель: \ \ \ \underline{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ } 
+		\hspace {2.25cm} Востров А. В.}
+	
+	\vspace{40pt} 
+	\begin{flushright}
+		{<<\underline{\ \ \ \ \ \ \ \ }>>\underline{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+			20\underline{\ \ \ \ \ }г.}
+	\end{flushright}
+	
+	\vspace{80pt} 
+	\begin{center}
+		{\large Санкт-Петербург, 2025}
+	\end{center}
+	\thispagestyle{empty}
+	
+	
+	\newpage
+	\tableofcontents
+	
+	\newpage
+	\section* {Введение}
+	\addcontentsline{toc}{section}{Введение}
+	В рамках данной лабораторной работы необходимо реализовать двумерный клеточный автомат с окрестностью фон Неймана в соответствии с заданным вариантом.
+	
+	\par В соответствии с вариантом было использовано число 59350005.
+	\par Необходимо дать возможность пользователю самостоятельно определять ширину поля и количество итераций. Также необходимо предусмотреть возможность ввода различных начальных условий (как вручную, так и случайным образом) по выбору пользователя.
+	\par Реализовать программу можно как в консоли, так и в графическом интерфейсе.
+	\par В качестве граничных условий реализовать тороидальные граничные условия. 
+	\par В результате необходимо проанализировать поведение клеточного автомата в отчёте, включая паттерны, сходимость и другие характеристики.
+	
+	\newpage
+	\section{Математическое описание}
+	
+	\subsection{Клеточный автомат} 
+	Клеточный автомат — дискретная динамическая система, определяемая кортежем:
+	\begin{center}
+	$CA = (L, S, N, f)$, где:
+	\end{center}
+	\begin{itemize}
+		\item $L$ — регулярная решетка размерности $d$
+		\item $S$ — конечное множество состояний
+		\item $N$ — окрестность клетки
+		\item $f: S^n \rightarrow S$ — локальная функция перехода
+	\end{itemize}
+	
+	Двумерный клеточный автомат можно определить как множество конечных автоматов на плоскости, помеченных целочисленными координатами $(i, j) \in [0, W-1] \times [0, H-1]$, каждый из которых может находиться в одном из состояний $S = \{0, 1\}$.
+	
+	 \par Функция, аргументами которой являются состояния соседей клетки, вычисляющая новое состояние для клетки определяется следующим образом: 
+	 \begin{center}
+	 	$\phi(A, B, C, D, E)$.
+	\end{center}
+	
+	 Новое состояние клетки:
+	 \begin{center}
+		$new_s = \phi(A, B, C, D, E)$.
+	\end{center}
+	
+	Для каждой клетки определено множество клеток, называемых окрестностью. Устанавливаются правила перехода клеток из одного состояния в другое. Обычно правила перехода одинаковы для всех клеток. В данной работе используется окрестность фон Неймана Рис. \ref{neyman:1}.
+	
+	\par Один шаг автомата подразумевает обход всех клеток и на основе данных о текущем состоянии клетки и её окрестности определение нового состояния клетки, которое будет у неё при следующем шаге.
+	
+	\par Эволюция клеточного автомата во времени описывается уравнением:
+	 \begin{center}
+		$s(t+1, x) = f(N(s(t, x)))$, где:
+	 \end{center}
+	 
+	\begin{itemize}
+		\item $s(t, x)$ — состояние клетки $x$ в момент времени $t$
+		\item $N(s(t, x))$ — состояния клеток в окрестности фон Неймана
+		\item $f$ — функция перехода, определяющая новое состояние клетки
+	\end{itemize}
+	
+	
+	\subsection{Окрестность фон Неймана}
+	
+	Для двумерного случая окрестность фон Неймана радиуса $r=1$ включает 5 клеток. Для центральной клетки с координатами $(i, j) \in [0, W-1] \times [0, H-1]$ окрестность определяется как:
+	 \begin{center}
+		$N(i,j) = \{(i,j), (i-1,j), (i+1,j), (i,j-1), (i,j+1)\}$.
+	\end{center}
+	
+	Кодирование состояния окрестности в 5-битное число:
+	\begin{center}
+		$\text{state} = f(A, B, C, D, E) = s(i,j) \times 16 + s(i,j-1) \times 8 + s(i+1,j) \times 4 + s(i,j+1) \times 2 + s(i-1,j) \times 1$,
+	\end{center}
+	
+	где функция $f$ вычисляет численный код состояния окрестности.
+		
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=0.4\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/1.png}
+		\caption{Окрестность фон Неймана}
+		\label{neyman:1}
+	\end{figure}
+	
+	
+	\subsection{Функция перехода}
+	
+	Правила перехода генерируются из числа 59350005, что эквивалентно $11100010100110010010110101_2$. Чтобы сформировать правила, необходимо это число в двоичной системе счисления дополнить нулями до 32 бит. Все переходы состояний представлены на Рис.\ref{cell:rule}.
+	
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=0.11\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/2.png}
+		\caption{Таблица истинности}
+		\label{cell:rule}
+	\end{figure}
+	
+
+	\subsection{Граничные условия}
+	
+	В данной реализации использованы тороидальные (периодические) граничные условия, которые обеспечивают замкнутость пространства и исключают краевые эффекты. Математически это выражается через операцию взятия по модулю:
+	
+	\[
+	\text{cell}(x, y) = \text{cell}(x \bmod W, y \bmod H)
+	\]
+	
+	где:
+	\begin{itemize}
+		\item $W$ — ширина поля
+		\item $H$ — высота поля
+		\item $\bmod$ — операция взятия по модулю
+	\end{itemize}
+	
+	Для клетки с координатами $(i, j) \in [0, W-1] \times [0, H-1]$ соседи определяются следующим образом:
+	
+	\begin{align*}
+		\text{B} &= \text{grid}[i,(j-1) \bmod W] \\
+		\text{C} &= \text{grid}[(i+1) \bmod H, j] \\
+		\text{D} &= \text{grid}[i,(j+1) \bmod W] \\
+		\text{E} &= \text{grid}[(i-1) \bmod H,j]
+	\end{align*}
+	
+	
+	\newpage
+	\section{Особенности реализации}
+	
+	\subsection{class NeumannCellularAutomaton}
+	Класс, содержащий все методы для работы с клеточным автоматом, включая инициализацию, обновление состояния и визуализацию.
+	
+	\begin{verbatim}
+		variant = 39
+		day = 23
+		month = 3
+		year = 2005
+		n = 11 *  variant * day * month * year
+		
+		class NeumannCellularAutomaton:
+		def __init__(self, width, height=None):
+		self.width = width
+		self.height = height if height else width
+		self.grid = np.zeros((self.height, self.width), dtype=int)
+		self.rules = self._generate_rules_from_id(n)
+		
+		def _generate_rules_from_id(self, student_id):
+
+		def get_neumann_neighbors(self, x, y):
+		
+		def get_neighborhood_state(self, x, y):
+
+		def update(self):
+
+		def set_random_initial_state(self, density=0.5):
+
+		def set_manual_initial_state(self, pattern):
+
+		def visualize_simulation(self, iterations):
+		
+		def run_simulation(self, iterations, visualize=True):
+		
+		def run_console_simulation(self, iterations):
+		
+		def visualize_simulation(self, iterations):
+				def animate(frame):
+
+		def analyze_behavior(self, max_iterations=100):
+		
+		def plot_behavior_analysis(self, live_history, density_history, max_iterations):
+
+	\end{verbatim}
+	
+	\subsection{Функция main()}
+	Функция отвечает за взаимодействие с пользователем. Реализована в виде цикла с меню выбора параметров.
+	
+	\textbf{На вход:} параметры ширины поля, количества итераций и начальные условия от пользователя.  
+	\par\textbf{На выход:} сигнал о завершении программы.
+	
+	\begin{verbatim}
+def main():
+print("Двумерный клеточный автомат с окрестностью фон Неймана")
+print("Функция: 59350005")
+
+try:
+	width = int(input("Введите ширину поля: ") or 100)
+	iterations = int(input("Введите количество итераций: ") or 100)
+except ValueError:
+	print("Ошибка: введите целые числа")
+	return
+
+automaton = NeumannCellularAutomaton(width)
+
+print("\nВыберите начальное состояние:")
+print("1 - Случайное распределение")
+print("2 - Волны")
+print("3 - Шахматная доска")
+print("4 - Спираль")
+print("5 - Сетка из точек")
+print("6 - Крест")
+print("7 - Случайное плотное (70%)")
+print("8 - Случайное разреженное (30%)")
+
+choice = input("Ваш выбор (1-8): ") or "1"
+
+patterns = {
+	"1": "random",
+	"2": "waves",
+	"3": "checkerboard",
+	"4": "spiral",
+	"5": "dots_grid",
+	"6": "cross",
+	"7": "random_dense",
+	"8": "random_sparse"
+}
+
+if choice in patterns:
+	pattern = patterns[choice]
+	if pattern.startswith("random"):
+		density = 0.7 if pattern == "random_dense" else 0.3 if pattern == "random_sparse" else 0.5
+		automaton.set_random_initial_state(density)
+	else:
+		automaton.set_manual_initial_state(pattern)
+else:
+	print("Неверный выбор, используется случайное распределение")
+	automaton.set_random_initial_state(0.5)
+
+display_mode = input("Режим отображения (1 - консоль, 2 - графика): ") or "2"
+
+if display_mode == "1":
+	automaton.run_simulation(iterations, visualize=False)
+else:
+	automaton.run_simulation(iterations, visualize=True)
+
+analyze = input("Провести расширенный анализ поведения? (y/n): ")
+if analyze.lower() == 'y':
+	automaton.analyze_behavior(iterations)
+	\end{verbatim}
+	
+	\subsection{Генерация правил из номера (\_generate\_rules\_from\_id)}
+	
+	Функция преобразует число в набор правил для клеточного автомата. Номер переводится в двоичную систему, дополняется нулями до 32 бит, и каждый бит становится правилом для соответствующего состояния окрестности.
+	
+	\textbf{На вход:} номер варианта $student\_id$.  
+	\par \textbf{На выход:} словарь правил $rules$.
+	
+	\begin{verbatim}
+		def _generate_rules_from_id(self, student_id):
+			binary_str = bin(student_id)[2:]
+			while len(binary_str) < 32:
+				binary_str = '0' + binary_str
+			rules_binary = binary_str[-32:]
+			rules = {}
+			for i in range(32):
+				rules[i] = int(rules_binary[i])
+			return rules
+	\end{verbatim}
+	
+	\subsection{Получение соседей по окрестности фон Неймана (get\_neumann\_neighbors)}
+	
+	Функция возвращает состояния четырех соседей клетки $(x, y)$ с учетом тороидальных граничных условий. Используется операция взятия по модулю для обеспечения цикличности пространства.
+	
+	\textbf{На вход:} координаты клетки $(x, y)$.  
+	\par \textbf{На выход:} список состояний соседей $[верхний, правый, нижний, левый]$.
+	
+	\begin{verbatim}
+	def get_neumann_neighbors(self, x, y):
+        neighbors = []
+		neighbors.append(self.grid[(y - 1) % self.height, x])  # верхний
+		neighbors.append(self.grid[y, (x + 1) % self.width])  # правый
+		neighbors.append(self.grid[(y + 1) % self.height, x])  # нижний
+		neighbors.append(self.grid[y, (x - 1) % self.width])  # левый
+		return state
+	\end{verbatim}
+	
+	\subsection{Кодирование состояния окрестности (get\_neighborhood\_state)}
+	
+	Функция вычисляет 5-битный код, представляющий состояние окрестности клетки. Каждому соседу соответствует свой вес в двоичном представлении.
+	
+	\textbf{На вход:} координаты клетки $(x, y)$.  
+	\par \textbf{На выход:} число от 0 до 31, кодирующее состояние окрестности.
+	
+	\begin{verbatim}
+	def get_neighborhood_state(self, x, y):
+        center = self.grid[y, x]
+		neighbors = self.get_neumann_neighbors(x, y)
+		
+		state = center * 16  # центральная клетка (бит 4)
+		state += neighbors[0] * 8  # верхний сосед (бит 3)
+		state += neighbors[1] * 4  # правый сосед (бит 2)
+		state += neighbors[2] * 2  # нижний сосед (бит 1)
+		state += neighbors[3] * 1  # левый сосед (бит 0)
+		return state
+	\end{verbatim}
+	
+	\subsection{Обновление состояния автомата (update)}
+	
+	Функция выполняет один шаг эволюции клеточного автомата. Для каждой клетки вычисляется новое состояние на основе правил и текущей окрестности.
+	
+	\textbf{На вход:} текущее состояние автомата.  
+	\par \textbf{На выход:} обновленное состояние автомата.
+	
+	\begin{verbatim}
+	def update(self):
+		new_grid = np.zeros((self.height, self.width), dtype=int)
+		for y in range(self.height):
+			for x in range(self.width):
+				neighborhood_state = self.get_neighborhood_state(x, y)
+				new_grid[y, x] = self.rules[neighborhood_state]
+		self.grid = new_grid
+	\end{verbatim}
+	
+	
+	\subsection{Установка случайного начального состояния (set\_random\_initial\_state)}
+	
+	Функция инициализирует поле клеточного автомата случайными значениями с заданной плотностью.
+	
+	\textbf{На вход:} параметр плотности $\text{density}$, по умолчанию 0.5.  
+	\par \textbf{На выход:} инициализированная матрица состояний.
+	
+	\begin{verbatim}
+	def set_random_initial_state(self, density=0.5):
+		self.grid = np.random.choice([0, 1], 
+		size=(self.height, self.width),
+		p=[1 - density, density])
+	\end{verbatim}
+	
+	\subsection{Установка начального состояния (set\_manual\_initial\_state)}
+	
+	Функция устанавливает начальную конфигурацию автомата согласно выбранному паттерну. Реализованы различные паттерны: случайное распределение, волны, шахматная доска, спираль и сетка из точек.
+	
+	\textbf{На вход:} идентификатор паттерна $pattern$.  
+	\par \textbf{На выход:} инициализированное начальное состояние.
+	
+	\begin{verbatim}
+		def set_manual_initial_state(self, pattern):
+		self.grid = np.zeros((self.height, self.width), dtype=int)
+		center_x, center_y = self.width // 2, self.height // 2
+		
+		if pattern == "random":
+		self.set_random_initial_state(0.5)
+		
+		elif pattern == "waves":
+		for y in range(self.height):
+		for x in range(self.width):
+		if (y // 2) % 3 == 0:
+		self.grid[y, x] = 1
+		
+		elif pattern == "checkerboard":
+		cell_size = 2
+		for y in range(self.height):
+		for x in range(self.width):
+		if ((x // cell_size) + (y // cell_size)) % 2 == 0:
+		self.grid[y, x] = 1
+		
+		elif pattern == "spiral":
+		size = min(self.width, self.height) // 3
+		for i in range(size):
+		angle = i * 0.3
+		radius = i * 0.8
+		x = int(center_x + radius * np.cos(angle))
+		y = int(center_y + radius * np.sin(angle))
+		if 0 <= x < self.width and 0 <= y < self.height:
+		self.grid[y, x] = 1
+		for dx in [-1, 0, 1]:
+		for dy in [-1, 0, 1]:
+		nx, ny = x + dx, y + dy
+		if 0 <= nx < self.width and 0 <= ny < self.height and random.random() < 0.3:
+		self.grid[ny, nx] = 1
+		
+		elif pattern == "dots_grid":
+		spacing = 5
+		for y in range(0, self.height, spacing):
+		for x in range(0, self.width, spacing):
+		if y < self.height and x < self.width:
+		self.grid[y, x] = 1
+		
+		elif pattern == "cross":
+		self.grid[center_y, center_x] = 1
+		self.grid[center_y - 1, center_x] = 1
+		self.grid[center_y + 1, center_x] = 1
+		self.grid[center_y, center_x - 1] = 1
+		self.grid[center_y, center_x + 1] = 1
+		
+		elif pattern == "random_dense":
+		self.set_random_initial_state(0.7)
+		elif pattern == "random_sparse":
+		self.set_random_initial_state(0.3)
+		
+		def run_simulation(self, iterations, visualize=True):
+		if visualize:
+		self.visualize_simulation(iterations)
+		else:
+		self.run_console_simulation(iterations)
+	\end{verbatim}
+	
+	\subsection{Консольная симуляция (run\_console\_simulation)}
+	
+	Функция выполняет симуляцию в консольном режиме с выводом статистики.
+	
+	\textbf{На вход:} количество итераций $\text{iterations}$.  
+	\par \textbf{На выход:} пошаговый вывод состояния в консоль.
+	
+	\begin{verbatim}
+		def run_console_simulation(self, iterations):
+		print("Начальное состояние:")
+		self.print_grid()
+		
+		print(f"\n{'Шаг':<6} {'Живые':<8} {'Плотность':<10}")
+		print("-" * 25)
+		
+		for i in range(iterations + 1):
+		if i > 0:
+		self.update()
+		
+		live_cells = np.sum(self.grid)
+		density = live_cells / (self.width * self.height)
+		print(f"{i:<6} {live_cells:<8} {density:.4f}")
+		
+		if i < iterations:
+		print(f"\nШаг {i + 1}:")
+		self.print_grid()
+		time.sleep(0.5)
+	\end{verbatim}
+	
+	\subsection{Вывод сетки в консоль (print\_grid)}
+	
+	Функция отображает текущее состояние автомата в консоли.
+	
+	\textbf{На вход:} числовая матрица состояний.  
+	\par \textbf{На выход:} последовательность строк в стандартный поток вывода.
+	
+	\begin{verbatim}
+		def print_grid(self):
+		for row in self.grid:
+		print(''.join([' | ' if cell else ' ' for cell in row]))
+	\end{verbatim}
+	
+	\subsection{Визуализация симуляции (visualize\_simulation)}
+	
+	Функция создает анимацию эволюции клеточного автомата с одновременным отображением графика динамики количества "живых" клеток.
+	
+	\textbf{На вход:} количество итераций $iterations$.  
+	\par \textbf{На выход:} объект анимации библиотеки Matplotlib
+	
+	\begin{verbatim}
+		def visualize_simulation(self, iterations):
+		fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+		cmap = colors.ListedColormap(['white', 'black'])
+		
+		img = ax1.imshow(self.grid, cmap=cmap, interpolation='nearest')
+		ax1.set_title(f'Клеточный автомат (шаг 0)')
+		ax1.set_xticks([])
+		ax1.set_yticks([])
+		
+		line, = ax2.plot([], [], 'b-', linewidth=2)
+		ax2.set_xlabel('Шаг итерации')
+		ax2.set_ylabel('Количество клеток в состоянии 1')
+		ax2.set_title('Динамика состояния 1')
+		ax2.grid(True, alpha=0.3)
+		ax2.set_xlim(0, iterations)
+		
+		live_cells_history = [np.sum(self.grid)]
+		
+		def animate(frame):
+		if frame > 0:
+		self.update()
+		current_live = np.sum(self.grid)
+		live_cells_history.append(current_live)
+		else:
+		current_live = live_cells_history[0]
+		
+		img.set_array(self.grid)
+		ax1.set_title(f'Клеточный автомат (шаг {frame})')
+		
+		x_data = list(range(frame + 1))
+		line.set_data(x_data, live_cells_history[:frame + 1])
+		
+		if live_cells_history:
+		max_live = max(live_cells_history)
+		ax2.set_ylim(0, max(1, max_live * 1.1))
+		
+		if hasattr(animate, 'annotation'):
+		animate.annotation.remove()
+		
+		if frame > 0:
+		animate.annotation = ax2.annotate(f'{current_live}',
+		xy=(frame, current_live),
+		xytext=(5, 5), textcoords='offset points',
+		bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))		
+		return img, line
+		
+		anim = animation.FuncAnimation(
+		fig, animate, frames=iterations + 1,
+		interval=500, repeat=False, blit=False)
+		
+		plt.tight_layout()
+		plt.show()		
+		self.live_cells_history = live_cells_history
+	\end{verbatim}
+	
+	\subsection{Анализ поведения (analyze\_behavior)}
+	
+	Функция выполняет расширенный анализ поведения автомата, включая построение различных графиков и вычисление статистических характеристик.
+	
+	\textbf{На вход:} максимальное число итераций $max\_iterations$.  
+	\par \textbf{На выход:} массивы данных о количестве живых клеток и плотности по итерациям.
+	
+	\begin{verbatim}
+		def analyze_behavior(self, max_iterations=100):
+		print("Расширенный анализ поведения автомата...")
+		
+		initial_grid = self.grid.copy()
+		live_history = []
+		density_history = []
+		
+		for i in range(max_iterations):
+		live_cells = np.sum(self.grid)
+		density = live_cells / (self.width * self.height)
+		
+		live_history.append(live_cells)
+		density_history.append(density)
+		self.update()
+		
+		if i > 0 and live_history[-1] == live_history[-2]:
+		print(f"Стабилизация на шаге {i}: {live_cells} живых клеток")
+		break
+		
+		self.grid = initial_grid
+		self.plot_behavior_analysis(live_history, density_history, max_iterations)		
+		return live_history, density_history
+	\end{verbatim}
+	
+	\subsection{Построение графиков анализа (plot\_behavior\_analysis)}
+	
+	Функция создает комплексную визуализацию анализа поведения автомата.
+	
+	\textbf{На вход:} массивы данных о количестве живых клеток и плотности по итерациям, максимальное число итераций.  
+\par \textbf{На выход:} объект фигуры библиотеки Matplotlib.
+	
+	\begin{verbatim}
+		def plot_behavior_analysis(self, live_history, density_history, max_iterations):
+		fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(12, 10))
+		steps = list(range(len(live_history)))
+		
+		ax1.plot(steps, live_history, 'b-', linewidth=2, label='Живые клетки')
+		ax1.set_xlabel('Шаг итерации')
+		ax1.set_ylabel('Количество живых клеток')
+		ax1.set_title('Динамика количества живых клеток')
+		ax1.grid(True, alpha=0.3)
+		ax1.legend()
+		
+		ax2.plot(steps, density_history, 'r-', linewidth=2, label='Плотность')
+		ax2.set_xlabel('Шаг итерации')
+		ax2.set_ylabel('Плотность')
+		ax2.set_title('Динамика плотности')
+		ax2.grid(True, alpha=0.3)
+		ax2.legend()
+		
+		ax3.hist(live_history, bins=20, alpha=0.7, color='green', edgecolor='black')
+		ax3.set_xlabel('Количество живых клеток')
+		ax3.set_ylabel('Частота')
+		ax3.set_title('Распределение количества живых клеток')
+		ax3.grid(True, alpha=0.3)
+		
+		if len(live_history) > 1:
+		changes = [live_history[i] - live_history[i-1] 
+		for i in range(1, len(live_history))]
+		ax4.plot(steps[1:], changes, 'g-', linewidth=2, label='Изменение')
+		ax4.axhline(y=0, color='red', linestyle='--', alpha=0.5)
+		ax4.set_xlabel('Шаг итерации')
+		ax4.set_ylabel('Изменение количества клеток')
+		ax4.set_title('Скорость изменения')
+		ax4.grid(True, alpha=0.3)
+		ax4.legend()
+		plt.tight_layout()
+		plt.show()
+		
+		print(f"\nСтатистика анализа:")
+		print(f"Начальное количество: {live_history[0]}")
+		print(f"Финальное количество: {live_history[-1]}")
+		print(f"Максимальное количество: {max(live_history)}")
+		print(f"Минимальное количество: {min(live_history)}")
+		print(f"Среднее количество: {np.mean(live_history):.2f}")
+	\end{verbatim}	
+
+	
+		\newpage
+		\section {Результаты работы программы}
+		Перед началом работы пользователь указывает размеры поля и количество итераций, также выбирает начальное состояние и выбирает режим отображения, как показано на Рис. \ref{res:0} и Рис. \ref{res:1}.
+		
+		\begin{figure}[H]
+			\centering
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/3.png}
+				\caption{Валидация значений}
+				\label{res:0}
+			\end{minipage}
+			\hfill
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=0.6\linewidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/4.png}
+				\caption{Первые итерации}
+				\label{res:1}
+			\end{minipage}
+		\end{figure}
+		
+		
+		Помимо консольного режима, автомат можно вывести в отдельное окно, как показано на рис.\ref{sost:1}-\ref{sost:4},где представлены четыре различных начальных состояния клеточного автомата, при графическом выводе.
+		
+		\begin{figure}[H]
+			\centering
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/7.png}
+				\caption{(a) Спираль}
+				\label{sost:1}
+			\end{minipage}
+			\hfill
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/8.png}
+				\caption{(b) Сетка из точек}
+				\label{sost:2}
+			\end{minipage}
+			
+			\vspace{0.5cm}
+			
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/5.png}
+				\caption{(c)  Волны (полосы)}
+				\label{sost:3}
+			\end{minipage}
+			\hfill
+			\begin{minipage}[b]{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/6.png}
+				\caption{(d) Шахматная доск}
+				\label{sost:4}
+			\end{minipage}
+			%\caption{Четыре начальных состояния клеточного автомата}
+		\end{figure}
+   
+   
+   		Ниже приведен результат работы клеточного автомата в графическом режиме  на Рис. \ref{r:2} и расширенный анализ, который показывает всю статистику на момент работы автомата Рис. \ref{r:1}.
+   		\begin{figure}[!h]
+   			\centering
+   			\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/10.png}
+   			\caption{Режим работы автомата}
+   			\label{r:1}
+   		\end{figure}
+	
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/11.png}
+			\caption{Режим аналитики}
+			\label{r:2}
+		\end{figure}
+   	
+		\newpage
+		\section {Анализ клеточного автомата}
+		Определение Класса IV по классификации Вольфрама -- результатом эволюции являются структуры, которые взаимодействуют сложным образом с формированием локальных, устойчивых структур. В результате эволюции
+		могут получаться некоторые последовательности. Локальные изменения в начальных условиях оказывают неопределяемое влияние на ход эволюции системы.
+		
+		Исследованный клеточный автомат демонстрирует поведение, характерное для Класса IV по классификации Вольфрама. Это подтверждается несколькими ключевыми наблюдениями:
+		\begin{itemize}
+		\item Автомат стремится к устойчивому значению 
+		\item От незначительных изменений начальных условий поведение автомата не меняется 
+		\item Система способна поддерживать паттерны.
+		\end{itemize}
+		
+		При начальнызх условиях шахматеной доски, сетки или креста автомат приходит в статичное состояние образуя паттерны или группу сменных паттерна, которые показаны на Рис. \ref{0:1} - \ref{0:2}. Крест приходит в статичное состояние спустя 274 итераций. Сетка не меняет свой рисунок, однако система динамически перемещается сверху вниз. Шахматкая доска чередует 12 постоянных паттернов, которые циклично заменяют друг друга. 
+		
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/12.png}
+			\caption{Крест}
+			\label{0:1}
+		\end{figure}
+		
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/13.png}
+			\caption{Сетка}
+			\label{0:0}
+		\end{figure}
+		
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\textwidth]{/Users/Seva/Polytech/TheoryOfAlgorithm/theory_of_algorithm/14.png}
+			\caption{Шахматная доска}
+			\label{0:2}
+		\end{figure}
+		\newpage
+		\mbox{}
+		\newpage
+		Наиболее яркой характеристикой является стабилизация плотности живых клеток на уровне ~43\%, наблюдаемая практически при всех начальных условиях. Эта величина не зависит от размера поля и количества итераций.
+		
+		Для исходного варианта 59350005 выявлено 32 правила:
+		\begin{itemize}
+			\item Правил с результатом 1: 13 (40.6\%)
+			\item Правил с результатом 0: 19 (59.4\%) 
+		\end{itemize}
+		
+		Анализ возникающих паттернов показывает отсутствие стабильных структур типа осцилляторов или глайдеров. Все образующиеся конфигурации носят временный характер и быстро разрушаются под влиянием окружающего "шума". Характерным примером такого поведением является Спираль, поскольку система разрастается сохраняя определенный рисунок и правила распостранения, однако в конечном итоге система превразается в полностью хаотичную и паттерны исчезают. 		
+		
+		\newpage
+		\section* {Заключение}
+		\addcontentsline{toc}{section}{Заключение}
+		В данной работе был реализован двумерный клеточный автомат с окрестностью Фон-Неймана. В
+		выбранной модели каждая ячейка взаимодействует с пятью элементами: самой собой	и четырьмя соседями по вертикали и горизонтали. Функция перехода задана числом
+		59350005. 
+		\par Размер поля вводится пользователем, что обеспечивает возможность адаптации модели под различные задачи. Начальные условия могут быть сгенерированы случайно или использовать определенные рисунки. Торроидальные (циклические) граничные условия означают, что противоположные края поля связаны между собой, формируя замкнутую поверхность. Это
+		исключает влияние краевых эффектов и позволяет исследовать внутреннюю динамику автомата без искажений, связанных с границами. 
+		\par В рамках программы была реализована дополнительная функция — расширенный анализ автомата.
+		
+	     \par \textbf{Достоинства реализации}: 
+		
+		\begin{itemize}
+			\item Инкапсуляция - все данные и методы работы с автоматом содержатся в одном классе
+			\item Программа не зависит от входной функции
+			\item Вместе с автоматом выводится динамический график, отображающий состояние автомата в данный момент
+			\item Работоспособность при больших значениях (программа работает в штатном режиме при значениях поля 1000 х 1000).
+		\end{itemize}
+		
+		\par \textbf{Недостатки реализации}: 
+		
+		\begin{itemize}
+			\item Статические правила - невозможность изменения правил во время выполнения
+			\item Потребление памяти - хранение полной истории для анимации
+			\item Настройки работы автомата задаются програмно и пользователь не имеет возможности выставить скорость работы, пройти по шагам или остановить, а после воспроизвести работу автомата.
+		\end{itemize}
+		
+		\par \textbf{Масштабирование}: 
+		
+		\begin{itemize}
+			\item Динамическое изменение настроек во время выполнения
+			\item Возможность задания 2 сторон поля, отображения на неквадратном поле.
+		\end{itemize}
+	
+		\newpage
+		\section* {Список материалов}
+		\addcontentsline{toc}{section}{Список материалов}
+		\vspace{-1.1cm}
+		\begin{thebibliography}{}
+			\bibitem{litlink1} <<New kind of science>>, S. Wolfram. --- Текст: электронный  --- URL: \href{http://www.wolframscience.com/}{https://web.archive.org/web/20070508234748 http://www.wolframscience.com/} (дата обращения: 22.10.2025).
+			\bibitem{litlink2} Секция «Телематика». --- Текст: электронный --- URL: \href{https://tema.spbstu.ru/tgraph/}{https://tema.spbstu.ru/tgraph/} (дата обращения: 22.10.2025).  
+		\end{thebibliography}
+		
+		
+	\end{document}

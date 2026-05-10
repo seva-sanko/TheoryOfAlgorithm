@@ -1,0 +1,11 @@
+.DS_Store
+.idea/
+.venv/
+__pycache__/
+*.py[cod]
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+theory_of_algorithm/avtomat
